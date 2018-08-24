@@ -32,6 +32,7 @@
   },
   "scripts": {
     "build": "node scripts/build.js && bsb -make-world",
+    "clean": "bsb -clean-world",
     "format:reason": "bsrefmt --in-place src/*.re",
     "ignore-prebuild": "node ../../node_modules/copy/bin/cli.js ../../README.md ./packages/react-icons && node ../../node_modules/rimraf/bin.js ./lib"
   },

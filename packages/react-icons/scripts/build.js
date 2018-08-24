@@ -10,7 +10,7 @@ const { icons } = require('../src/icons');
 // file path
 const rootDir = path.resolve(__dirname, '../');
 const DIST = path.resolve(rootDir, '.');
-const LIB = path.resolve(rootDir, './lib');
+//const LIB = path.resolve(rootDir, './lib');
 
 // logic
 
@@ -60,6 +60,7 @@ async function convertIconData(svg) {
   return tree[0]; // like: [ { tag: 'path', attr: { d: 'M436 160c6.6 ...', ... }, child: { ... } } ]
 }
 function generateIconRow(icon, formattedName, iconData) {
+  return `module ${formattedName} = ReactIcons.Make({ let iconName = "${formattedName}" });\n`;
   return `module ${formattedName} = Make("${formattedName}", ${JSON.stringify(
     iconData
   )});\n`;
@@ -103,7 +104,7 @@ async function dirInit() {
   const writeFile = promisify(fs.writeFile);
 
   await mkdir(DIST).catch(ignore);
-  await mkdir(LIB).catch(ignore);
+  //await mkdir(LIB).catch(ignore);
 
   const write = (filePath, str) =>
     writeFile(path.resolve(DIST, ...filePath), str, 'utf8').catch(ignore);
@@ -121,7 +122,7 @@ async function dirInit() {
 
     await write(
       [icon.id, `${icon.id}.re`],
-      '/* THIS FILE IS AUTO GENERATED*/\nopen ReactIcons;\n'
+      '/* THIS FILE IS AUTO GENERATED*/\n/*open ReactIcons;*/\n'
     );
   }
 
@@ -168,7 +169,6 @@ async function writeIconModule(icon) {
 async function writeIconsManifest() {
   const writeFile = promisify(fs.writeFile);
   const copyFile = promisify(fs.copyFile);
-  const appendFile = promisify(fs.appendFile);
 
   const writeObj = icons.map(icon => ({
     id: icon.id,
@@ -178,20 +178,20 @@ async function writeIconsManifest() {
     licenseUrl: icon.licenseUrl
   }));
   const manifest = JSON.stringify(writeObj, null, 2);
-  await writeFile(
-    path.resolve(LIB, 'iconsManifest.mjs'),
-    `export const IconsManifest = ${manifest}`,
-    'utf8'
-  );
-  await writeFile(
-    path.resolve(LIB, 'iconsManifest.js'),
-    `module.exports.IconsManifest = ${manifest}`,
-    'utf8'
-  );
-  await copyFile(
-    'src/iconsManifest.d.ts',
-    path.resolve(LIB, 'iconsManifest.d.ts')
-  );
+  // await writeFile(
+  //   path.resolve(LIB, 'iconsManifest.mjs'),
+  //   `export const IconsManifest = ${manifest}`,
+  //   'utf8'
+  // );
+  // await writeFile(
+  //   path.resolve(LIB, 'iconsManifest.js'),
+  //   `module.exports.IconsManifest = ${manifest}`,
+  //   'utf8'
+  // );
+  // await copyFile(
+  //   'src/iconsManifest.d.ts',
+  //   path.resolve(LIB, 'iconsManifest.d.ts')
+  // );
 }
 
 async function writeLicense() {
