@@ -60,7 +60,7 @@ async function convertIconData(svg) {
   return tree[0]; // like: [ { tag: 'path', attr: { d: 'M436 160c6.6 ...', ... }, child: { ... } } ]
 }
 function generateIconRow(icon, formattedName, iconData) {
-  return `module ${formattedName} = MakeIcon(${formattedName}, ${JSON.stringify(
+  return `module ${formattedName} = Make("${formattedName}", ${JSON.stringify(
     iconData
   )});\n`;
   // // +
