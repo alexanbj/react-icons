@@ -1,8 +1,8 @@
 {
   "name": "bs-react-icons",
   "version": "3.0.5",
-  "description": "SVG React icons of popular icon packs using ES6 imports",
-  "author": "Goran Gajic",
+  "description": "SVG ReasonReact icons of popular icon packs",
+  "author": "Alexander Bjerkan <alexander.bjerkan@gmail.com>",
   "contributors": [
     "kamijin_fanta <kamijin@live.jp>"
   ],
