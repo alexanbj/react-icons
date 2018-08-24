@@ -59,32 +59,39 @@ async function convertIconData(svg) {
   const tree = elementToTree($svg);
   return tree[0]; // like: [ { tag: 'path', attr: { d: 'M436 160c6.6 ...', ... }, child: { ... } } ]
 }
-function generateIconRow(icon, formattedName, iconData, type = 'module') {
-  switch (type) {
-    case 'module':
-      return (
-        `export var ${formattedName} = function (props) {\n` +
-        `  return GenIcon(${JSON.stringify(iconData)})(props);\n` +
-        `};\n`
-      );
-    case 'common':
-      return (
-        `module.exports.${formattedName} = function (props) {\n` +
-        `  return GenIcon(${JSON.stringify(iconData)})(props);\n` +
-        `};\n`
-      );
-    case 'dts':
-      return `export declare const ${formattedName}: IconType;\n`;
-  }
+function generateIconRow(icon, formattedName, iconData) {
+  return `module ${formattedName} = MakeIcon(${formattedName}, ${JSON.stringify(
+    iconData
+  )});\n`;
+  // // +
+  // `  [@bs.module "react-icons/fa"]\n` +
+  // `  external reactClass : ReasonReact.reactClass = "FaAccessibleIcon";\n` +
+  // `});\n`
+  // switch (type) {
+  //   case 'module':
+  //     return (
+  //       `export var ${formattedName} = function (props) {\n` +
+  //       `  return GenIcon(${JSON.stringify(iconData)})(props);\n` +
+  //       `};\n`
+  //     );
+  //   case 'common':
+  //     return (
+  //       `module.exports.${formattedName} = function (props) {\n` +
+  //       `  return GenIcon(${JSON.stringify(iconData)})(props);\n` +
+  //       `};\n`
+  //     );
+  //   case 'dts':
+  //     return `export declare const ${formattedName}: IconType;\n`;
+  // }
 }
-function generateIconsEntry(iconId, type = 'module') {
-  switch (type) {
-    case 'module':
-      return `export * from './${iconId}';\n`;
-    case 'dts':
-      return `export * from './${iconId}';\n`;
-  }
-}
+// function generateIconsEntry(iconId, type = 'module') {
+//   switch (type) {
+//     case 'module':
+//       return `export * from './${iconId}';\n`;
+//     case 'dts':
+//       return `export * from './${iconId}';\n`;
+//   }
+// }
 
 async function dirInit() {
   const ignore = err => {
@@ -113,32 +120,24 @@ async function dirInit() {
     await mkdir(path.resolve(DIST, icon.id)).catch(ignore);
 
     await write(
-      [icon.id, 'index.js'],
-      "// THIS FILE IS AUTO GENERATED\nconst { GenIcon } = require('../lib/iconBase')\n"
-    );
-    await write(
-      [icon.id, 'index.mjs'],
-      "// THIS FILE IS AUTO GENERATED\nimport { GenIcon } from '../lib/iconBase';\n"
-    );
-    await write(
-      [icon.id, 'index.d.ts'],
-      "import { IconTree, IconType } from '../lib/iconBase'\n// THIS FILE IS AUTO GENERATED\n"
+      [icon.id, `${icon.id}.re`],
+      '/* THIS FILE IS AUTO GENERATED*/\nopen ReactIcons;\n'
     );
   }
 
-  for (const file of initFiles) {
-    await write([file], '// THIS FILE IS AUTO GENERATED\n');
-  }
+  // for (const file of initFiles) {
+  //   await write([file], '// THIS FILE IS AUTO GENERATED\n');
+  // }
 }
 async function writeIconModule(icon) {
   const appendFile = promisify(fs.appendFile);
   const files = await getIconFiles(icon);
   const exists = new Set(); // for remove duplicate
 
-  const entryModule = generateIconsEntry(icon.id, 'module');
-  await appendFile(path.resolve(DIST, 'all.mjs'), entryModule, 'utf8');
-  const entryDts = generateIconsEntry(icon.id, 'dts');
-  await appendFile(path.resolve(DIST, 'all.d.ts'), entryDts, 'utf8');
+  // const entryModule = generateIconsEntry(icon.id, 'module');
+  // await appendFile(path.resolve(DIST, 'all.mjs'), entryModule, 'utf8');
+  // const entryDts = generateIconsEntry(icon.id, 'dts');
+  // await appendFile(path.resolve(DIST, 'all.d.ts'), entryDts, 'utf8');
 
   for (const file of files) {
     const svgStr = await promisify(fs.readFile)(file, 'utf8');
@@ -151,12 +150,16 @@ async function writeIconModule(icon) {
     exists.add(name);
 
     // write like: module/fa/data.mjs
-    const modRes = generateIconRow(icon, name, iconData, 'module');
-    await appendFile(path.resolve(DIST, icon.id, 'index.mjs'), modRes, 'utf8');
-    const comRes = generateIconRow(icon, name, iconData, 'common');
-    await appendFile(path.resolve(DIST, icon.id, 'index.js'), comRes, 'utf8');
-    const dtsRes = generateIconRow(icon, name, iconData, 'dts');
-    await appendFile(path.resolve(DIST, icon.id, 'index.d.ts'), dtsRes, 'utf8');
+    const modRes = generateIconRow(icon, name, iconData);
+    await appendFile(
+      path.resolve(DIST, icon.id, `${icon.id}.re`),
+      modRes,
+      'utf8'
+    );
+    // const comRes = generateIconRow(icon, name, iconData, 'common');
+    // await appendFile(path.resolve(DIST, icon.id, 'index.js'), comRes, 'utf8');
+    // const dtsRes = generateIconRow(icon, name, iconData, 'dts');
+    // await appendFile(path.resolve(DIST, icon.id, 'index.d.ts'), dtsRes, 'utf8');
 
     exists.add(file);
   }
