@@ -60,7 +60,7 @@ async function convertIconData(svg) {
   return tree[0]; // like: [ { tag: 'path', attr: { d: 'M436 160c6.6 ...', ... }, child: { ... } } ]
 }
 function generateIconRow(icon, formattedName, iconData) {
-  return `module ${formattedName} = ReactIcons.Make({ let iconName = "${formattedName}" });\n`;
+  return `module ${formattedName} = Icons.Make({ let iconName = "${formattedName}" });\n`;
   return `module ${formattedName} = Make("${formattedName}", ${JSON.stringify(
     iconData
   )});\n`;
@@ -118,10 +118,10 @@ async function dirInit() {
   writeFile(path.resolve(DIST, '.gitignore'), gitignore);
 
   for (const icon of icons) {
-    await mkdir(path.resolve(DIST, icon.id)).catch(ignore);
+    //await mkdir(path.resolve(DIST, icon.id)).catch(ignore);
 
     await write(
-      [icon.id, `${icon.id}.re`],
+      ['src', `${camelcase(icon.id)}.re`],
       '/* THIS FILE IS AUTO GENERATED*/\n/*open ReactIcons;*/\n'
     );
   }
@@ -152,11 +152,7 @@ async function writeIconModule(icon) {
 
     // write like: module/fa/data.mjs
     const modRes = generateIconRow(icon, name, iconData);
-    await appendFile(
-      path.resolve(DIST, icon.id, `${icon.id}.re`),
-      modRes,
-      'utf8'
-    );
+    await appendFile(path.resolve('./src', `${icon.id}.re`), modRes, 'utf8');
     // const comRes = generateIconRow(icon, name, iconData, 'common');
     // await appendFile(path.resolve(DIST, icon.id, 'index.js'), comRes, 'utf8');
     // const dtsRes = generateIconRow(icon, name, iconData, 'dts');
@@ -166,33 +162,33 @@ async function writeIconModule(icon) {
   }
 }
 
-async function writeIconsManifest() {
-  const writeFile = promisify(fs.writeFile);
-  const copyFile = promisify(fs.copyFile);
+// async function writeIconsManifest() {
+//   const writeFile = promisify(fs.writeFile);
+//   const copyFile = promisify(fs.copyFile);
 
-  const writeObj = icons.map(icon => ({
-    id: icon.id,
-    name: icon.name,
-    projectUrl: icon.projectUrl,
-    license: icon.license,
-    licenseUrl: icon.licenseUrl
-  }));
-  const manifest = JSON.stringify(writeObj, null, 2);
-  // await writeFile(
-  //   path.resolve(LIB, 'iconsManifest.mjs'),
-  //   `export const IconsManifest = ${manifest}`,
-  //   'utf8'
-  // );
-  // await writeFile(
-  //   path.resolve(LIB, 'iconsManifest.js'),
-  //   `module.exports.IconsManifest = ${manifest}`,
-  //   'utf8'
-  // );
-  // await copyFile(
-  //   'src/iconsManifest.d.ts',
-  //   path.resolve(LIB, 'iconsManifest.d.ts')
-  // );
-}
+//   const writeObj = icons.map(icon => ({
+//     id: icon.id,
+//     name: icon.name,
+//     projectUrl: icon.projectUrl,
+//     license: icon.license,
+//     licenseUrl: icon.licenseUrl
+//   }));
+//   const manifest = JSON.stringify(writeObj, null, 2);
+//   await writeFile(
+//     path.resolve(LIB, 'iconsManifest.mjs'),
+//     `export const IconsManifest = ${manifest}`,
+//     'utf8'
+//   );
+//   await writeFile(
+//     path.resolve(LIB, 'iconsManifest.js'),
+//     `module.exports.IconsManifest = ${manifest}`,
+//     'utf8'
+//   );
+//   await copyFile(
+//     'src/iconsManifest.d.ts',
+//     path.resolve(LIB, 'iconsManifest.d.ts')
+//   );
+// }
 
 async function writeLicense() {
   const copyFile = promisify(fs.copyFile);
@@ -219,7 +215,7 @@ async function main() {
   try {
     await dirInit();
     await writeLicense();
-    await writeIconsManifest();
+    // await writeIconsManifest();
     for (const icon of icons) {
       await writeIconModule(icon);
     }

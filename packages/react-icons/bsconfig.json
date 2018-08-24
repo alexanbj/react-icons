@@ -1,7 +1,7 @@
 {
   "name": "bs-react-icons",
   "bsc-flags": ["-bs-super-errors"],
-  "sources": ["src", "fa", "fi", "go", "io", "md", "ti"],
+  "sources": ["src"],
   "bs-dependencies": ["reason-react"],
   "reason": {
     "react-jsx": 2
