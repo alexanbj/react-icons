@@ -5,3 +5,4 @@ module
 *.log
 *.tgz
 .vscode
+.merlin
