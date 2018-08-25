@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/react-icons/react-icons#readme",
   "devDependencies": {
+    "@svgr/core": "^2.2.0",
     "bs-platform": "^4.0.5",
     "camelcase": "^5.0.0",
     "cheerio": "^1.0.0-rc.2",

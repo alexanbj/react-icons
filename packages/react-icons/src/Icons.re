@@ -1,7 +1,11 @@
-module type Icon = {let iconName: string;};
+
+module type Icon = {
+  let iconName: string;
+};
+
 
 /* TODO */
-let treeToElement = tree => ReactDOMRe.createElement("circle", [||]);
+let treeToElement = () => ReactDOMRe.createElement("circle", [||]);
 
 module Make = (Icon: Icon) => {
   let component = ReasonReact.statelessComponent(Icon.iconName);

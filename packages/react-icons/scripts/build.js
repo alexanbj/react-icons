@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { promisify } = require('util');
 const camelcase = require('camelcase');
+const svgr = require('@svgr/core').default;
 
 const { icons } = require('../src/icons');
 
@@ -51,7 +52,7 @@ async function convertIconData(svg) {
         child:
           e.children && e.children.length
             ? elementToTree(cheerio(e.children))
-            : undefined
+            : []
       }))
       .get();
 
@@ -59,9 +60,16 @@ async function convertIconData(svg) {
   return tree[0]; // like: [ { tag: 'path', attr: { d: 'M436 160c6.6 ...', ... }, child: { ... } } ]
 }
 function generateIconRow(icon, formattedName, iconData) {
-  return `module ${formattedName} = Icons.Make({ let iconName = "${formattedName}", let iconData = ${JSON.stringify(
-    iconData
-  )} });\n`;
+  return `module ${formattedName} = Icons.Make({ let iconName = "${formattedName}"; let iconData: Icons.iconTree = ${stringifyObject(
+    iconData,
+    { singleQuotes: false }
+  )}; });\n`;
+}
+
+function reactIconTemplate(code, config, state) {
+  //const props = getProps(config);
+  let result = code;
+  return result;
 }
 
 async function dirInit() {
@@ -97,7 +105,10 @@ async function writeIconModule(icon) {
 
   for (const file of files) {
     const svgStr = await promisify(fs.readFile)(file, 'utf8');
-    const iconData = await convertIconData(svgStr);
+
+    /*.then(jsCode => {
+      console.log(jsCode);
+    });*/
 
     const rawName = path.basename(file, path.extname(file));
     const pascalName = camelcase(rawName, { pascalCase: true });
@@ -105,9 +116,20 @@ async function writeIconModule(icon) {
     if (exists.has(name)) continue;
     exists.add(name);
 
+    const test = await svgr(
+      svgStr,
+      {
+        icon: false,
+        dimension: true,
+        expandProps: false,
+        template: reactIconTemplate
+      },
+      { componentName: 'MyComponent' }
+    );
+
     // write like: module/fa/data.mjs
-    const modRes = generateIconRow(icon, name, iconData);
-    await appendFile(path.resolve('./src', `${icon.id}.re`), modRes, 'utf8');
+    //const modRes = generateIconRow(icon, name, '');
+    await appendFile(path.resolve('./src', `${icon.id}.re`), test, 'utf8');
 
     exists.add(file);
   }
