@@ -1,6 +1,7 @@
 
 module type Icon = {
   let iconName: string;
+  let svg: ReasonReact.reactElement;
 };
 
 

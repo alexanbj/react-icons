@@ -59,17 +59,26 @@ async function convertIconData(svg) {
   const tree = elementToTree($svg);
   return tree[0]; // like: [ { tag: 'path', attr: { d: 'M436 160c6.6 ...', ... }, child: { ... } } ]
 }
-function generateIconRow(icon, formattedName, iconData) {
-  return `module ${formattedName} = Icons.Make({ let iconName = "${formattedName}"; let iconData: Icons.iconTree = ${stringifyObject(
-    iconData,
-    { singleQuotes: false }
-  )}; });\n`;
-}
+// function generateIconRow(icon, formattedName, iconData) {
+//   return `module ${formattedName} = Icons.Make({ let iconName = "${formattedName}"; let iconData: Icons.iconTree = ${stringifyObject(
+//     iconData,
+//     { singleQuotes: false }
+//   )}; });\n`;
+// }
 
 function reactIconTemplate(code, config, state) {
   //const props = getProps(config);
-  let result = code;
-  return result;
+  const test = `module ${state.componentName} = Icons.Make({ let iconName = "${
+    state.componentName
+  }"; let svg = ${code}; });`;
+
+  const reg = new RegExp(/\{(\d+)\}/g);
+
+  return test.replace(reg, (match, p1) => `"${p1}"`);
+
+  return test;
+  // let result = code;
+  // return result;
 }
 
 async function dirInit() {
@@ -120,11 +129,12 @@ async function writeIconModule(icon) {
       svgStr,
       {
         icon: false,
-        dimension: true,
+        dimensions: false,
         expandProps: false,
-        template: reactIconTemplate
+        template: reactIconTemplate,
+        prettier: false
       },
-      { componentName: 'MyComponent' }
+      { componentName: name }
     );
 
     // write like: module/fa/data.mjs
